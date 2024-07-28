@@ -41,7 +41,7 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
 
   // Some default configurations
   conf.version = pjson.version;
-  conf.versionNo = 17
+  conf.versionNo = 18
   if(!conf.ttl)
   conf.ttl = 60;
 
