@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { SpawnOptions } from "child_process";
 import { Scenes, Telegraf } from "telegraf";
 export type TelegramBotToken = "string";

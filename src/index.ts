@@ -2,6 +2,7 @@ import bt from './bot';
 import Hlp from './helpers';
 import config from './config'
 import real from "./help/real"
+import pjson from "../package.json"
 
 let which = require("which")
 let exes = {
@@ -39,8 +40,8 @@ function cmdd(ctx: any) {
 export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.Config) {
 
   // Some default configurations
-  conf.version = "3.1.0"
-  conf.versionNo = 26
+  conf.version = pjson.version;
+  conf.versionNo = 17
   if(!conf.ttl)
   conf.ttl = 60;
 
@@ -185,8 +186,13 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
           return ctx.reply('I must be admin with delete message permission')
       }
 
-      function cmp(a: string) {
-        return (new RegExp("^\\" + config.startSymbol + a, "i")).test(compiler)
+      // function cmp(a: string) {
+      //   return (new RegExp("^\\" + config.startSymbol + "(" + a + ")", "i")).test(compiler)
+      // }
+
+      function cmp(a: string) { 
+        const regex = new RegExp(`^${config.startSymbol}(${a})`, "i");
+        return regex.test(compiler); 
       }
 
       if (compiler.startsWith("/start") && objj.hasOwnProperty("" + ctx.message.from.id)) {
@@ -196,7 +202,7 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
       }
       const rplc = (fromR: String, toR: String) => {
         if (compiler.startsWith(config?.startSymbol as any + fromR)) {
-          ctx.message.text = compiler.replace(new RegExp("^\\" + config.startSymbol + fromR, "i"), config.startSymbol as any + toR)
+          ctx.message.text = compiler.replace(new RegExp("^\\" + config.startSymbol + fromR , "i"), config.startSymbol as any + toR)
         }
       }
 
@@ -224,9 +230,9 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
           ctx.scene.enter("ts")
         else ctx.reply("No node exists in system").catch((err: any) => console.error(err))
       }
-      else if (cmp("cpp|cplus|c++")) {
+      else if (cmp("cpp|cplus|c\\+\\+")) {
         rplc("cplus", "cpp")
-        rplc("c++", "cpp")
+        rplc("c\\+\\+", "cpp")
         if (exes.cpp)
           ctx.scene.enter("cpp")
         else ctx.reply("No g++ compiler exists in system").catch((err: any) => console.error(err))
@@ -243,7 +249,9 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
         else ctx.reply("No go compiler exists in system").catch((err: any) => console.error(err))
       }
       // next();
-    } catch (error) {
+    } catch (error: any) {
+      console.log(error)
+      ctx.reply(error.message)
       console.error("Error in index.ts file starting problem")
     }
   })
