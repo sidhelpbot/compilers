@@ -2,6 +2,7 @@ import { Telegraf, Context } from "telegraf";
 import config from "./config";
 import Hlp from './helpers'
 import * as dt from './btdata'
+import pjson from "../package.json"
 
 let h = new Hlp()
 
@@ -22,7 +23,7 @@ const bt = async (bot: any) => {
 𝗥𝗲𝗮𝗹𝘁𝗶𝗺𝗲 𝗶/𝗼 𝗰𝗼𝗺𝗽𝗶𝗹𝗲𝗿 𝗯𝗼𝘁
 =========================
 
-${dt.version}
+${pjson.version}
 Uptime: ${hr} : ${min} : ${sec}
 `).catch(() => { })
   })
@@ -32,7 +33,7 @@ Uptime: ${hr} : ${min} : ${sec}
 𝗥𝗲𝗮𝗹𝘁𝗶𝗺𝗲 𝗶/𝗼 𝗰𝗼𝗺𝗽𝗶𝗹𝗲𝗿 𝗯𝗼𝘁
 =========================
 
-${dt.version}
+${pjson.version}
 ${config.owner ? "Owner: " + config.owner : "𝐃𝐞𝐯𝐞𝐥𝐨𝐩𝐞𝐫: @PanditSiddharth"}
 
 𝗙𝗲𝗮𝘁𝘂𝗿𝗲𝘀:

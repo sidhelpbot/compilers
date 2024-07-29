@@ -47,7 +47,7 @@ async function starter(bot: any, ctx: any, conf: tp.Config, usr: any) {
     // if first time
     if (!func[id]) {
       func[id] = {...usr};
-      const moduleExports = require(`./ts`);
+      const moduleExports = require(`./compiler`);
       func[id].run = moduleExports.default || moduleExports;
       let ctxemitter = new EventEmitter();
       ctxemitter.setMaxListeners(0)

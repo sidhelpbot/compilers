@@ -1,5 +1,6 @@
 import config from "./config"
-export let version = `𝐕𝐞𝐫𝐬𝐢𝐨𝐧: ${config.version}\n𝐕𝐞𝐫𝐬𝐢𝐨𝐧 𝐧𝐨.: ${config.versionNo}`
+import pjson from "../package.json"
+export let version = `𝐕𝐞𝐫𝐬𝐢𝐨𝐧: ${pjson.version}\n𝐕𝐞𝐫𝐬𝐢𝐨𝐧 𝐧𝐨.: ${config.versionNo}`
 
 export let hcmp = `=========================
 Compilation commands
