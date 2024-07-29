@@ -366,7 +366,10 @@ let cmplr = async (ctx: any, obj: any = {}) => {
 
     newObj.node.on('exit', (statusCode: any) => {
       if (statusCode != 0)
+        reply(ctx, "Process exited with status code", statusCode)
         console.error("Process exited with status code", statusCode)
+      terminate(ctx, obj)
+  
     })
 
     return newObj.node
