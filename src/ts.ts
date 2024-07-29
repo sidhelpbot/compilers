@@ -48,8 +48,8 @@ let cmplr = async (ctx: any, obj: any = {}) => {
     let previous = Date.now()
     let repeats = 0
     let looperr = false
-    let jsout = async (tempdata: any) => {
 
+    async function sendToTelegram(tempdata: any) {
       if (tempdata != '-1a\n') {
         let current = Date.now()
         if (previous + 1000 > current)
@@ -62,7 +62,7 @@ let cmplr = async (ctx: any, obj: any = {}) => {
           return
         }
         newObj.editedMes += tempdata.toString().replace("\\", "\\\\")
-  
+
         if (repeats > 5 || looperr)
           return
 
@@ -86,12 +86,9 @@ let cmplr = async (ctx: any, obj: any = {}) => {
           } catch (err: any) { }
         }
       }
-      // return
-      if (!newObj.firstlistener)
-        return
+    }
 
-      newObj.firstlistener = false
-
+    async function  messageFromUser() {
       let connt = 0;
 
       newObj.ctxemitter.on('ctx', async (ctxx: any) => {
@@ -117,8 +114,7 @@ let cmplr = async (ctx: any, obj: any = {}) => {
     }
 
     obj[ctx.from.id].status = "input"
-
-    jsout('-1a\n')
+    messageFromUser()
     newObj.countpp = countp(newObj.code)
     newObj.code = newObj.code.replace(/\u00A0/mg, ' ')
     let ttl = ctx.scene.options.ttl
@@ -317,7 +313,7 @@ let cmplr = async (ctx: any, obj: any = {}) => {
     }
 
     newObj.node.setMaxListeners(0)
-    newObj.node.stdout.on('data', jsout);
+    newObj.node.stdout.on('data', sendToTelegram);
 
     let m = true
     newObj.node.stderr.on('data', async (data: any) => {
