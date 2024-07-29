@@ -72,20 +72,21 @@ let cmplr = async (ctx: any, obj: any = {}) => {
     }
 
     async function sendToTelegram(tempdata: any) {
-      let current = Date.now()
-      if (previous + 1000 > current)
-        repeats++
-      if (repeats > 8 && !looperr) {
-        looperr = true
-        await terminate(ctx, obj)
-        reply(ctx, 'It seems you are created infinite loop')
-        ctx.scene.leave()
-        return await h.sleep(500)
-      }
+      // let current = Date.now()
+      // if (previous + 1000 > current)
+      //   repeats++
+      // console.log(repeats, tempdata.toString())
+      // if (repeats > 15 && !looperr) {
+      //   looperr = true
+      //   await terminate(ctx, obj)
+      //   reply(ctx, 'It seems you are created infinite loop')
+      //   ctx.scene.leave()
+      //   return await h.sleep(500)
+      // }
 
       newObj.editedMes += tempdata.toString().replace("\\", "\\\\")
 
-      if (newObj.mid == 0 && newObj.preTime == "undefined" || newObj.preTime && newObj.preTime + 400 < Date.now()) {
+      if (newObj.mid == 0 && newObj.preTime == "undefined" || newObj.preTime && newObj.preTime + 300 < Date.now()) {
         newObj.preTime = Date.now()
         delete newObj.timeOutId;
         await sendToTelegramCore()
@@ -93,10 +94,10 @@ let cmplr = async (ctx: any, obj: any = {}) => {
         newObj.preTime = Date.now()
 
         if (newObj.timeOutId == "undefined") {
-          newObj.timeOutId = setTimeout(sendToTelegramCore, 400)
+          newObj.timeOutId = setTimeout(sendToTelegramCore, 300)
         } else {
             clearTimeout(newObj.timeOutId)
-          newObj.timeOutId = setTimeout(sendToTelegramCore, 300)
+          newObj.timeOutId = setTimeout(sendToTelegramCore, 250)
         }
 
       }
