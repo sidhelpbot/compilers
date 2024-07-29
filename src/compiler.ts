@@ -49,46 +49,62 @@ let cmplr = async (ctx: any, obj: any = {}) => {
     let repeats = 0
     let looperr = false
 
-    async function sendToTelegram(tempdata: any) {
-      if (tempdata != '-1a\n') {
-        let current = Date.now()
-        if (previous + 1000 > current)
-          repeats++
-        if (repeats > 5 && !looperr) {
-          looperr = true
-          await terminate(ctx, obj)
-          reply(ctx, 'It seems you are created infinite loop')
-          ctx.scene.leave()
-          return
-        }
-        newObj.editedMes += tempdata.toString().replace("\\", "\\\\")
-
-        if (repeats > 5 || looperr)
-          return
-
-        if (newObj.mid == 0) {
-          let replyString = "" + newObj.editedMes + " ```";
-          newObj.mid = await ctx.reply(replyString, { parse_mode: "MarkdownV2" })
-            .catch((err: any) => {
-              if (err.message.includes('too long')) {
-                looperr = true
-                reply(ctx, 'message is too long')
-                terminate(ctx, obj)
-                ctx.scene.leave()
-              }
-            })
-        }
-        else {
-          // newObj.editedMes += data
-          try {
-            await edit(newObj.mid.message_id, newObj.editedMes)
-              .catch((err) => { console.error(err) })
-          } catch (err: any) { }
-        }
+    async function sendToTelegramCore() {
+      if (newObj.mid == 0) {
+        let replyString = "" + newObj.editedMes + " ```";
+        newObj.mid = await ctx.reply(replyString, { parse_mode: "MarkdownV2" })
+          .catch((err: any) => {
+            if (err.message.includes('too long')) {
+              looperr = true
+              reply(ctx, 'message is too long')
+              terminate(ctx, obj)
+              ctx.scene.leave()
+            }
+          })
+      }
+      else {
+        // newObj.editedMes += data
+        try {
+          await edit(newObj.mid.message_id, newObj.editedMes)
+            .catch((err) => { console.error(err) })
+        } catch (err: any) { }
       }
     }
 
-    async function  messageFromUser() {
+    async function sendToTelegram(tempdata: any) {
+      let current = Date.now()
+      if (previous + 1000 > current)
+        repeats++
+      if (repeats > 8 && !looperr) {
+        looperr = true
+        await terminate(ctx, obj)
+        reply(ctx, 'It seems you are created infinite loop')
+        ctx.scene.leave()
+        return await h.sleep(500)
+      }
+
+      newObj.editedMes += tempdata.toString().replace("\\", "\\\\")
+
+      if (newObj.mid == 0 && newObj.preTime == "undefined" || newObj.preTime && newObj.preTime + 400 < Date.now()) {
+        newObj.preTime = Date.now()
+        delete newObj.timeOutId;
+        await sendToTelegramCore()
+      } else {
+        newObj.preTime = Date.now()
+
+        if (newObj.timeOutId == "undefined") {
+          newObj.timeOutId = setTimeout(sendToTelegramCore, 400)
+        } else {
+            clearTimeout(newObj.timeOutId)
+          newObj.timeOutId = setTimeout(sendToTelegramCore, 300)
+        }
+
+      }
+
+
+    }
+
+    async function messageFromUser() {
       let connt = 0;
 
       newObj.ctxemitter.on('ctx', async (ctxx: any) => {
@@ -112,6 +128,7 @@ let cmplr = async (ctx: any, obj: any = {}) => {
     if (newObj.status == "input") {
       return await newObj.ctxemitter.emit('ctx', await (ctx));
     }
+    newObj.first = true;
 
     obj[ctx.from.id].status = "input"
     messageFromUser()
@@ -342,6 +359,7 @@ let cmplr = async (ctx: any, obj: any = {}) => {
       } else {
         reply(ctx, 'Program terminated unsuccessfully')
       }
+
       terminate(ctx, obj)
     });
 
@@ -370,7 +388,7 @@ async function reply(ctx: any, mss: any, tim: any = 10) {
 
 let terminate = async (ctx: any, options: any = {}) => {
   let newObj = options[ctx.from.id]
-  await h.sleep(200)
+  await h.sleep(options.sleepTime || 1000)
   if (ctx.scene)
     ctx.scene.leave()
 
