@@ -42,7 +42,7 @@ async function starter(bot: any, ctx: any, conf: tp.Config, usr: any) {
       }
     }
 
-    msg.text = msg.text.replace(/\/(node|js|ts|type|py|python|cc|cpp|code|cplus|jv|java|go|golang)/i, "").trim()
+    msg.text = msg.text.replace(/\/(node|js|ts|type|py|python|cc|cpp|code|cplus|jv|java|go|golang|ps|sh)/i, "").trim()
 
     // if first time
     if (!func[id]) {
@@ -59,6 +59,7 @@ async function starter(bot: any, ctx: any, conf: tp.Config, usr: any) {
 
       func[id].editedMes = "Output\: \n```"+ usr.cmp + "\n"
       func[id][usr.cmp + "exe"] = usr.exe;
+      func[id].cmp = usr.cmp;
     }
 
     // if user only used /js command

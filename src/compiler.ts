@@ -51,6 +51,9 @@ let cmplr = async (ctx: any, obj: any = {}) => {
 
     async function sendToTelegramCore() {
       if (newObj.mid == 0) {
+        if(newObj.editedMes.length > 4020)
+          newObj.editedMes = newObj.editedMes.substring(0, 4020) + "...."
+
         let replyString = "" + newObj.editedMes + " ```";
         newObj.mid = await ctx.reply(replyString, { parse_mode: "MarkdownV2" })
           .catch((err: any) => {
@@ -101,7 +104,6 @@ let cmplr = async (ctx: any, obj: any = {}) => {
         }
 
       }
-
 
     }
 
@@ -154,6 +156,21 @@ let cmplr = async (ctx: any, obj: any = {}) => {
       newObj.code = newObj.code.replace(/^(\s*)(pt)(.*)/gim, '$1print($3);');
       newObj.node = spawn(newObj.exe, ['-c', newObj.code], config.spawnOptions || { env: {} });
     }
+
+    /**
+     * For PowerShell commands
+     */
+    if (newObj.cmp == "ps") {
+      newObj.node = spawn(newObj.exe, ['-Command', newObj.code], config.spawnOptions || {});
+    }
+
+    /**
+     * For Bash commands
+     */
+    else if (newObj.cmp == "sh") {
+      newObj.node = spawn(newObj.exe, ['-c', newObj.code], config.spawnOptions || {});
+    }
+
 
     /**
      * Some mid things in c/cpp and go compiler
@@ -367,9 +384,9 @@ let cmplr = async (ctx: any, obj: any = {}) => {
     newObj.node.on('exit', (statusCode: any) => {
       if (statusCode != 0)
         reply(ctx, "Process exited with status code", statusCode)
-        console.error("Process exited with status code", statusCode)
+      console.error("Process exited with status code", statusCode)
       terminate(ctx, obj)
-  
+
     })
 
     return newObj.node
@@ -392,6 +409,7 @@ async function reply(ctx: any, mss: any, tim: any = 10) {
 
 let terminate = async (ctx: any, options: any = {}) => {
   let newObj = options[ctx.from.id]
+  newObj.terminated = true;
   await h.sleep(options.sleepTime || 1000)
   if (ctx.scene)
     ctx.scene.leave()

@@ -13,7 +13,10 @@ let exes = {
   java: which.sync('java', { nothrow: true }),
   javac: which.sync('javac', { nothrow: true }),
   python: which.sync('python', { nothrow: true }),
-  python3: which.sync('python3', { nothrow: true })
+  python3: which.sync('python3', { nothrow: true }),
+  sh: which.sync('bash', { nothrow: true }),
+  ps: which.sync('powershell.exe', { nothrow: true }),
+
 }
 // 2 global dependencies
 import { Scenes, session, Telegraf } from "telegraf";
@@ -150,15 +153,40 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
 
   goScene.on("message", async (ctx: any) => {
     cmdd(ctx)
-    await startcheck(ctx, 'go')
+    if (await startcheck(ctx, 'go')) return;
     await starter(bot, ctx, conf, { cmp: "go", exe: exes.go })
   });
 
+  let shScene = new Scenes.BaseScene<Scenes.SceneContext>("sh");
+  shScene.enter(async (ctx: any) => {
+    cmdd(ctx)
+    if (await startcheck(ctx, 'sh')) return;
+    await starter(bot, ctx, conf, { cmp: "sh", exe: exes.sh })
+  });
+
+  shScene.on("message", async (ctx: any) => {
+    cmdd(ctx)
+    if (await startcheck(ctx, 'sh')) return;
+    await starter(bot, ctx, conf, { cmp: "sh", exe: exes.sh })
+  });
+
+  let psScene = new Scenes.BaseScene<Scenes.SceneContext>("ps");
+  psScene.enter(async (ctx: any) => {
+    cmdd(ctx)
+    if (await startcheck(ctx, 'ps')) return;
+    await starter(bot, ctx, conf, { cmp: "ps", exe: exes.ps })
+  });
+
+  psScene.on("message", async (ctx: any) => {
+    cmdd(ctx)
+    if (await startcheck(ctx, 'ps')) return;
+    await starter(bot, ctx, conf, { cmp: "ps", exe: exes.ps })
+  });
   // making instance of Telegraf class
   let bot = new Telegraf<Scenes.SceneContext>(token, (conf.telegram && typeof conf.telegram == "object") ? conf.telegram : {});
 
   // regestering all scenes
-  let stage = new Scenes.Stage<Scenes.SceneContext>([cScene, pyScene, jsScene, cppScene, jvScene, goScene, tsScene], { ttl: config.ttl });
+  let stage = new Scenes.Stage<Scenes.SceneContext>([cScene, pyScene, jsScene, cppScene, jvScene, goScene, tsScene, shScene, psScene], { ttl: config.ttl });
 
   // passing bot instance in bot.ts file by call those function
   bt(bot);
@@ -169,7 +197,7 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
   bot.use(stage.middleware());
 
   // Main Program starts from here it listens /js /py all commands and codes 
-  bot.hears(new RegExp("^\\" + config.startSymbol + "(code|start|py|python|ts|type|js|node|cc|cpp|cplus|sql|go|jv|java|c\\+\\+)|\\/start", "i"), async (ctx: any, next: any) => {
+  bot.hears(new RegExp("^\\" + config.startSymbol + "(code|start|py|python|ts|type|js|node|cc|cpp|cplus|sql|go|jv|java|c\\+\\+|sh|ps)|\\/start", "i"), async (ctx: any, next: any) => {
     try {
 
       if (conf.allowed) {
@@ -248,6 +276,16 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
           ctx.scene.enter("go")
         else ctx.reply("No go compiler exists in system").catch((err: any) => console.error(err))
       }
+      else if (cmp("sh")) {
+        if (exes.sh)
+          ctx.scene.enter("sh")
+        else ctx.reply("Use /ps command instead sh to run cammand in powershell").catch((err: any) => console.error(err))
+      }
+      else if (cmp("ps")) {
+        if (exes.ps)
+          ctx.scene.enter("ps")
+        else ctx.reply("Use /sh command instead sh to run cammand in bash terminal").catch((err: any) => console.error(err))
+      }
       // next();
     } catch (error: any) {
       console.log(error)
@@ -309,7 +347,15 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
       else if (("go").includes(cst)) {
         ctx.scene.enter("go")
         return true
-      }
+      } 
+      else if (("sh").includes(cst)) {
+        ctx.scene.enter("sh")
+        return true
+      } 
+      else if (("ps").includes(cst)) {
+        ctx.scene.enter("ps")
+        return true
+      } 
 
       return false
     } catch (error) {
