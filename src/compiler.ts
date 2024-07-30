@@ -89,7 +89,7 @@ let cmplr = async (ctx: any, obj: any = {}) => {
 
       newObj.editedMes += tempdata.toString().replace("\\", "\\\\")
 
-      if (newObj.mid == 0 && newObj.preTime == "undefined" || newObj.preTime && newObj.preTime + 300 < Date.now()) {
+      if (newObj.mid == 0 && newObj.preTime == "undefined" || newObj.preTime && newObj.preTime + 350 < Date.now()) {
         newObj.preTime = Date.now()
         delete newObj.timeOutId;
         await sendToTelegramCore()
@@ -97,10 +97,10 @@ let cmplr = async (ctx: any, obj: any = {}) => {
         newObj.preTime = Date.now()
 
         if (newObj.timeOutId == "undefined") {
-          newObj.timeOutId = setTimeout(sendToTelegramCore, 300)
+          newObj.timeOutId = setTimeout(sendToTelegramCore, 350)
         } else {
             clearTimeout(newObj.timeOutId)
-          newObj.timeOutId = setTimeout(sendToTelegramCore, 250)
+          newObj.timeOutId = setTimeout(sendToTelegramCore, 300)
         }
 
       }
@@ -154,7 +154,7 @@ let cmplr = async (ctx: any, obj: any = {}) => {
      */
     if (newObj.cmp == "py") {
       newObj.code = newObj.code.replace(/^(\s*)(pt)(.*)/gim, '$1print($3);');
-      newObj.node = spawn(newObj.exe, ['-c', newObj.code], config.spawnOptions || { env: {} });
+      newObj.node = spawn(newObj.exe, ['-u', '-c', newObj.code], config.spawnOptions || { env: {} });
     }
 
     /**
