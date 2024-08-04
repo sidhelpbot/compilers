@@ -12,7 +12,12 @@ ${config.startSymbol}cpp or ${config.startSymbol}cplus
 ${config.startSymbol}jv or ${config.startSymbol}java
 ${config.startSymbol}go for golang
 ${config.startSymbol}ts or ${config.startSymbol}type for typescript
-${config.startSymbol}sql for sql`
+${config.startSymbol}sql for sql
+${config.startSymbol}sh for bash
+${config.startSymbol}ps for powershell
+
+
+`
 
 export let hreal = `=========================
 Compilation commands
