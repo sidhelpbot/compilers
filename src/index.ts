@@ -40,7 +40,7 @@ function cmdd(ctx: any) {
   }
 }
 
-export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.Config) {
+export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scenes.SceneContext>, conf: tp.Config = {} as tp.Config) {
 
   // Some default configurations
   conf.version = pjson.version;
@@ -183,8 +183,12 @@ export function compiler(token: tp.TelegramBotToken, conf: tp.Config = {} as tp.
     await starter(bot, ctx, conf, { cmp: "ps", exe: exes.ps })
   });
   // making instance of Telegraf class
-  let bot = new Telegraf<Scenes.SceneContext>(token, (conf.telegram && typeof conf.telegram == "object") ? conf.telegram : {});
 
+  let bot: Telegraf<Scenes.SceneContext> = typeof telegrafBotByUser == "string" ?
+  new Telegraf<Scenes.SceneContext>(telegrafBotByUser, (conf.telegram && typeof conf.telegram == "object") ? conf.telegram : {}) 
+  : telegrafBotByUser;
+
+  
   // regestering all scenes
   let stage = new Scenes.Stage<Scenes.SceneContext>([cScene, pyScene, jsScene, cppScene, jvScene, goScene, tsScene, shScene, psScene], { ttl: config.ttl });
 
