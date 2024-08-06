@@ -5,6 +5,9 @@ import fs from 'fs'
 let which = require("which")
 import path from "path"
 import find from './help/findclass';
+import { Context, Scenes } from 'telegraf';
+import { Update } from 'telegraf/types';
+import { CustomCtx } from './types';
 
 let h = new Hlp();
 
@@ -29,21 +32,20 @@ function countp(inputString: any) {
 }
 
 
-let cmplr = async (ctx: any, obj: any = {}) => {
+let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
   // obj = obj || {}
   const edit = async (messageId: any, messageText: any) => {
     return await ctx.telegram.editMessageText(ctx.chat.id, messageId, undefined, messageText + " ```", { parse_mode: "MarkdownV2" })
   }
 
   let newObj = obj[ctx.from.id]
-
   try {
     if (newObj.status == "leave") {
       reply(ctx, 'Session terminated')
       ctx.scene.leave()
+
       return await terminate(ctx, obj)
     }
-
 
     let previous = Date.now()
     let repeats = 0
@@ -51,11 +53,14 @@ let cmplr = async (ctx: any, obj: any = {}) => {
 
     async function sendToTelegramCore() {
       if (newObj.mid == 0) {
-        if(newObj.editedMes.length > 4020)
+        if (newObj.editedMes.length > 4020)
           newObj.editedMes = newObj.editedMes.substring(0, 4020) + "...."
-
         let replyString = "" + newObj.editedMes + " ```";
-        newObj.mid = await ctx.reply(replyString, { parse_mode: "MarkdownV2" })
+
+        newObj.mid = await ctx.reply(replyString, {
+          parse_mode: "MarkdownV2",
+          reply_parameters: (newObj.inReply ? { message_id: newObj.inReply } : undefined)
+        })
           .catch((err: any) => {
             if (err.message.includes('too long')) {
               looperr = true
@@ -99,7 +104,7 @@ let cmplr = async (ctx: any, obj: any = {}) => {
         if (newObj.timeOutId == "undefined") {
           newObj.timeOutId = setTimeout(sendToTelegramCore, 350)
         } else {
-            clearTimeout(newObj.timeOutId)
+          clearTimeout(newObj.timeOutId)
           newObj.timeOutId = setTimeout(sendToTelegramCore, 300)
         }
 
@@ -137,14 +142,24 @@ let cmplr = async (ctx: any, obj: any = {}) => {
     messageFromUser()
     newObj.countpp = countp(newObj.code)
     newObj.code = newObj.code.replace(/\u00A0/mg, ' ')
-    let ttl = ctx.scene.options.ttl
+
+    if (newObj.code.startsWith("-r") && (ctx.message as any).reply_to_message) {
+      newObj.code = newObj.code.replace(/^\-r/, "")
+      newObj.inReply = (ctx.message as any).reply_to_message.message_id;
+    } else if (newObj.code.startsWith("-r")) {
+      ctx.reply("-r flag only works when you send command with code in reply to any message")
+     return await terminate(ctx, obj)
+    }
+
+    let ttl = (ctx.scene as any).options.ttl
+
     newObj.fromId = ctx.message.from.id
 
     newObj.timeid = setTimeout(() => {
       newObj.code = false
       if (newObj && newObj.node) {
         ctx.reply("Timout: " + ttl + " Seconds")
-        terminate(ctx, obj)
+        return terminate(ctx, obj)
       }
     }, ttl * 1000)
 
