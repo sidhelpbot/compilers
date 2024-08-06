@@ -424,6 +424,18 @@ async function reply(ctx: any, mss: any, tim: any = 10) {
 
 let terminate = async (ctx: any, options: any = {}) => {
   let newObj = options[ctx.from.id]
+  if(newObj.ok)
+    return
+  newObj.ok = true;
+  if(newObj.conf.onEnd && typeof newObj.conf.onEnd == "function"){
+
+    let end = newObj.conf.onEnd
+    if(end.length == 1){
+      await end(ctx)
+    } else {
+      await end(ctx, options)
+    }
+  }
   newObj.terminated = true;
   await h.sleep(options.sleepTime || 1000)
   if (ctx.scene)

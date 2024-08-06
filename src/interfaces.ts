@@ -31,4 +31,5 @@ export interface Config {
   configure?: (cnf: Config) => void;
   allowed?: string[] | number[];
   exes?: any;
+  end?: Function | undefined;
 }
