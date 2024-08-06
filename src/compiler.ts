@@ -144,7 +144,7 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
     newObj.code = newObj.code.replace(/\u00A0/mg, ' ')
 
     if (newObj.code.startsWith("-r") && (ctx.message as any).reply_to_message) {
-      newObj.code = newObj.code.replace(/^\-r/, "")
+      newObj.code = newObj.code.replace(/^\-r/, "")?.trim()
       newObj.inReply = (ctx.message as any).reply_to_message.message_id;
     } else if (newObj.code.startsWith("-r")) {
       ctx.reply("-r flag only works when you send command with code in reply to any message")
