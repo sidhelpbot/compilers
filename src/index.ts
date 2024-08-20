@@ -16,12 +16,13 @@ let exes = {
   python3: which.sync('python3', { nothrow: true }),
   sh: which.sync('bash', { nothrow: true }),
   ps: which.sync('powershell.exe', { nothrow: true }),
-
+  rs: which.sync('rustc', { nothrow: true }),
 }
 // 2 global dependencies
 import { Scenes, session, Telegraf } from "telegraf";
 import starter from './starter'
 import * as tp from "./interfaces"
+import { inlineStarter } from './inline';
 
 let objj: any = {};
 // this will run web server and always make it alive
@@ -74,6 +75,20 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
     cmdd(ctx);
     if (await startcheck(ctx, 'py python')) return;
     await starter(bot, ctx, conf, { cmp: "py", exe: exes.python || exes.python3 })
+  });
+
+  let rsScene = new Scenes.BaseScene<Scenes.SceneContext>("rs");
+  rsScene.enter(async (ctx: any) => {
+    cmdd(ctx);
+    if (await startcheck(ctx, 'rs rust'))
+      return;
+    await starter(bot, ctx, conf, { cmp: "rs", exe: exes.rs })
+  });
+
+  rsScene.on("message", async (ctx: any) => {
+    cmdd(ctx);
+    if (await startcheck(ctx, 'rs rust')) return;
+    await starter(bot, ctx, conf, { cmp: "rs", exe: exes.rs })
   });
 
   let cppScene = new Scenes.BaseScene<Scenes.SceneContext>("cpp");
@@ -190,9 +205,10 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
 
   
   // regestering all scenes
-  let stage = new Scenes.Stage<Scenes.SceneContext>([cScene, pyScene, jsScene, cppScene, jvScene, goScene, tsScene, shScene, psScene], { ttl: config.ttl });
+  let stage = new Scenes.Stage<Scenes.SceneContext>([cScene, pyScene, jsScene, rsScene, cppScene, jvScene, goScene, tsScene, shScene, psScene], { ttl: config.ttl });
 
   // passing bot instance in bot.ts file by call those function
+  inlineStarter(bot as any)
   bt(bot);
   real(bot as any);
 
@@ -201,7 +217,7 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
   bot.use(stage.middleware());
 
   // Main Program starts from here it listens /js /py all commands and codes 
-  bot.hears(new RegExp("^\\" + config.startSymbol + "(code|start|py|python|ts|type|js|node|cc|cpp|cplus|sql|go|jv|java|c\\+\\+|sh|ps)|\\/start", "i"), async (ctx: any, next: any) => {
+  bot.hears(new RegExp("^\\" + config.startSymbol + "(code|start|py|python|ts|type|js|node|cc|cpp|cplus|sql|go|jv|java|c\\+\\+|sh|ps|rs|rust)|\\/start", "i"), async (ctx: any, next: any) => {
     try {
 
       if (conf.allowed) {
@@ -274,6 +290,12 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
         if (exes.java || exes.javac)
           ctx.scene.enter("jv")
         else ctx.reply("No java compiler exists in system").catch((err: any) => console.error(err))
+      }
+      else if (cmp("rs|rust")) {
+        rplc("rust", "rs")
+        if (exes.gcc)
+          ctx.scene.enter("rs")
+        else ctx.reply("No rust compiler exists in system").catch((err: any) => console.error(err))
       }
       else if (cmp("go")) {
         if (exes.go)

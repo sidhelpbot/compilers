@@ -6,3 +6,4 @@ test/
 package-lock.json
 files/
 myfile.ts
+.env

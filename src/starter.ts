@@ -42,7 +42,7 @@ async function starter(bot: any, ctx: any, conf: tp.Config, usr: any) {
       }
     }
 
-    msg.text = msg.text.replace(/\/(node|js|ts|type|py|python|cc|cpp|code|cplus|jv|java|go|golang|ps|sh)/i, "").trim()
+    msg.text = msg.text.replace(/\/(node|js|ts|type|py|python|cc|cpp|code|cplus|jv|java|go|golang|ps|sh|rs|rust)/i, "").trim()
 
     // if first time
     if (!func[id]) {

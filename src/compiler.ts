@@ -190,7 +190,7 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
     /**
      * Some mid things in c/cpp and go compiler
      */
-    else if (/c|cpp|go/.test(newObj.cmp)) {
+    else if (/c|cpp|go|rs/.test(newObj.cmp)) {
 
       // newObj.root = path.join('.', 'files', `${newObj.cmp}${newObj.fromId}`);
       newObj.root = path.join(require('os').tmpdir(), `${newObj.cmp}${newObj.fromId}`);
@@ -279,6 +279,38 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
         newObj.node = spawn(cppexefile, [], newObj.conf.spawnOptions || { env: {} });
       }
 
+     /**
+       * For rust code
+       */
+     else if (newObj.cmp == "rs") {
+      newObj.code = newObj.code
+        .replace(/(^\s*pt)(.*)/gim, "println!($2);")
+
+      let rsexefile = path.join(newObj.root, `main`);
+
+      try {
+        fs.writeFileSync(newObj.filePath, newObj.code);
+      } catch (err: any) {
+        // Handle file writing error
+        console.error(err);
+        return terminate(ctx, obj)
+      }
+
+
+      const rsArgs = [
+        newObj.filePath,
+        '-o', rsexefile
+      ];
+
+      const { status, stderr } = spawnSync(newObj.exe, rsArgs);
+
+      if (status !== 0) {
+        terminate(ctx, obj);
+        return reply(ctx, stderr.toString());
+      }
+
+      newObj.node = spawn(rsexefile, [], newObj.conf.spawnOptions || { env: {} });
+    }
 
       /**
        * For go language
@@ -424,7 +456,7 @@ async function reply(ctx: any, mss: any, tim: any = 10) {
 
 let terminate = async (ctx: any, options: any = {}) => {
   let newObj = options[ctx.from.id]
-  if(newObj.ok)
+  if(newObj?.ok)
     return
   newObj.ok = true;
   if(newObj.conf.onEnd && typeof newObj.conf.onEnd == "function"){
