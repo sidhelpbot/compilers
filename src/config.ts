@@ -10,7 +10,7 @@ function configure(cnf: tp.Config) {
   config = cnf;
 }
 config.version = pjson.version;
-config.versionNo = 32
+config.versionNo = 33
 config.ttl = 60;
 
 if(!config.startSymbol)
