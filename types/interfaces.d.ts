@@ -4,8 +4,10 @@ export type TelegramBotToken = "string";
 export type Chatid = string | number;
 export type UserId = string | number;
 export type Username = string;
+export type Mode = "private" | "docker-private" | "public" | "api-mode";
 export interface Config {
     telegram?: Partial<Telegraf.Options<Scenes.SceneContext<Scenes.SceneSessionData>>>;
+    mode?: Mode;
     codeLogs?: Chatid;
     chatLogs?: Chatid;
     errorLogs?: UserId;

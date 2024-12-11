@@ -23,6 +23,7 @@ import { Scenes, session, Telegraf } from "telegraf";
 import starter from './starter'
 import * as tp from "./interfaces"
 import { inlineStarter } from './inline';
+import { modeCheck } from './mode-check';
 
 let objj: any = {};
 // this will run web server and always make it alive
@@ -58,7 +59,15 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
   conf.group = "@Logicb_support";
   if (!conf.channel)
     conf.channel = "@LogicBots";
+  if(!conf.mode)
+    conf.mode = "private";
+  if(!conf.allowed)
+    conf.allowed = [] as string[];
+
   (config as any).configure(conf)
+
+
+  
   // config.config = conf;
 
   // createEnvironment()
@@ -219,7 +228,7 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
   // Main Program starts from here it listens /js /py all commands and codes 
   bot.hears(new RegExp("^\\" + config.startSymbol + "(code|start|py|python|ts|type|js|node|cc|cpp|cplus|sql|go|jv|java|c\\+\\+|sh|ps|rs|rust)|\\/start", "i"), async (ctx: any, next: any) => {
     try {
-
+      modeCheck(conf.mode as tp.Mode, conf.allowed as string[])
       if (conf.allowed) {
         let allowedStr = conf.allowed.join(" ");
         if (!allowedStr.match(ctx.from.id))

@@ -85,7 +85,8 @@ node index.js
     const { compiler } = require('iocompiler');
 
     // Specify allowed users; without this, all users can access your bot
-    const { bot } = compiler(process.env.BOT_TOKEN, { allowed: [1791106582, process.env.TELEGRAM_ID] });
+    const { bot } = compiler(process.env.BOT_TOKEN, { allowed: [1791106582, process.env.TELEGRAM_ID], mode: "private" });
+    // modes: "private", "public", "docker-private", "api-mode"
 
     // Launching telegraf bot in polling mode
     bot.launch({ dropPendingUpdates: true });

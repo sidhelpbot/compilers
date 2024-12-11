@@ -176,183 +176,19 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
     }
 
     /**
-     * For PowerShell commands
-     */
-    if (newObj.cmp == "ps") {
-      newObj.node = spawn(newObj.exe, ['-Command', newObj.code], config.spawnOptions || {});
-    }
-
-    /**
      * For Bash commands
      */
     else if (newObj.cmp == "sh") {
-      newObj.node = spawn(newObj.exe, ['-c', newObj.code], config.spawnOptions || {});
-    }
-
-
-    /**
-     * Some mid things in c/cpp and go compiler
-     */
-    else if (/c|cpp|go|rs/.test(newObj.cmp)) {
-
-      // newObj.root = path.join('.', 'files', `${newObj.cmp}${newObj.fromId}`);
-      newObj.root = path.join(require('os').tmpdir(), `${newObj.cmp}${newObj.fromId}`);
-      newObj.filePath = path.join(newObj.root, `main.${newObj.cmp}`);
-
-      try {
-        if (!fs.existsSync(newObj.root))
-          fs.mkdirSync(newObj.root);
-      } catch (err: any) {
-        // Handle file writing error
-        console.error(err);
-        return terminate(ctx, obj)
-      }
-
-      /**
-       * For c language 
-       */
-      if (newObj.cmp == "c") {
-        newObj.code = newObj.code.replace(/^(\s*)(pt)(.*)/gim, '$1printf($3);');
-        newObj.code = newObj.code.replace(/"start"/gi, "#include <stdio.h>\nint main(){\n")
-          .replace(/"end"/gi, "\nreturn 0;\n}")
-          .replace(/(^\s*pt)(.*)/gim, "printf($2);")
-          .replace(/#include\s*\<conio\.h\>/, `#include "conio.h"`)
-          .replace(/(int\s+main\s*\([\s\S]*\)\s*\{)/, "$1 setbuf(stdout, NULL);")
-
-        try {
-          fs.writeFileSync(newObj.filePath, newObj.code);
-        } catch (err: any) {
-          // Handle file writing error
-          console.error(err);
-          return terminate(ctx, obj)
-        }
-
-
-        let cexefile = path.join(newObj.root, "main")
-        const gccArgs = [
-          '-I', path.join(__dirname, 'lib'),
-          '-o', cexefile, newObj.filePath,
-          path.join(__dirname, 'lib', 'conio.c'),
-          '-lm'
-        ];
-
-        const { status, stderr } = spawnSync(newObj.exe, gccArgs);
-
-        if (status !== 0) {
-          terminate(ctx, obj);
-          reply(ctx, stderr.toString().replace(new RegExp(newObj.filePath, 'g'), 'See'));
-          return ctx.scene.leave();
-        }
-
-        newObj.node = spawn(cexefile, [], config.spawnOptions || { env: {} });
-      }
-
-      /**
-       * For c++ code
-       */
-      else if (newObj.cmp == "cpp") {
-        newObj.code = newObj.code.replace(/"start"/gi, "#include <iostream>\nusing namespace std;\nint main(){\n")
-          .replace(/"end"/gi, "\nreturn 0;\n}")
-          .replace(/(^\s*pt)(.*)/gim, "cout<<$2;")
-
-        let cppexefile = path.join(newObj.root, `main.out`);
-
-
-        try {
-          fs.writeFileSync(newObj.filePath, newObj.code);
-        } catch (err: any) {
-          // Handle file writing error
-          console.error(err);
-          return terminate(ctx, obj)
-        }
-
-
-        const gppArgs = [
-          '-o', cppexefile,
-          newObj.filePath
-        ];
-
-        const { status, stderr } = spawnSync(newObj.exe, gppArgs);
-
-        if (status !== 0) {
-          terminate(ctx, obj);
-          return reply(ctx, stderr.toString());
-        }
-
-        newObj.node = spawn(cppexefile, [], newObj.conf.spawnOptions || { env: {} });
-      }
-
-     /**
-       * For rust code
-       */
-     else if (newObj.cmp == "rs") {
-      newObj.code = newObj.code
-        .replace(/(^\s*pt)(.*)/gim, "println!($2);")
-
-      let rsexefile = path.join(newObj.root, `main`);
-
-      try {
-        fs.writeFileSync(newObj.filePath, newObj.code);
-      } catch (err: any) {
-        // Handle file writing error
-        console.error(err);
-        return terminate(ctx, obj)
-      }
-
-
-      const rsArgs = [
-        newObj.filePath,
-        '-o', rsexefile
-      ];
-
-      const { status, stderr } = spawnSync(newObj.exe, rsArgs);
-
-      if (status !== 0) {
-        terminate(ctx, obj);
-        return reply(ctx, stderr.toString());
-      }
-
-      newObj.node = spawn(rsexefile, [], newObj.conf.spawnOptions || { env: {} });
-    }
-
-      /**
-       * For go language
-       */
-      else if (newObj.cmp == "go") {
-        newObj.code = newObj.code.replace(/^(\s*)(pt)(.*)/gim, '$1fmt.Println!($3);');
-        try {
-          fs.writeFileSync(newObj.filePath, newObj.code);
-        } catch (err: any) {
-          // Handle file writing error
-          console.error(err);
-          return terminate(ctx, obj)
-        }
-
-        newObj.node = spawn(newObj.exe, ['run', newObj.filePath], newObj.conf.spawnOptions || {
-          env: {
-            GOCACHE: newObj.root,
-          },
-        });
-      }
+      newObj.node = spawn(
+        "docker",
+        [ "run", "-i", "--rm", "ubuntu:24.10", "bash", '-c', newObj.code], config.spawnOptions || {});
     }
 
     /**
      * For js/ts languages
      */
-    else if ((/js|ts/.test(newObj.cmp))) {
+    else if ((/js/.test(newObj.cmp))) {
       newObj.countpp = countp(newObj.code)
-      newObj.code = newObj.code.replace(/(^\s*pt)(.*)/gim, 'console.log($2);');
-      if (newObj.cmp.includes("ts"))
-        newObj.node = spawn(path.join('.', 'node_modules', '.bin', 'tsx'), ['-e', newObj.code],
-          newObj.conf.spawnOptions || {
-            env: {
-              PATH: path.dirname(newObj.exe)
-            }
-          });
-      else
-      // newObj.node = spawn(newObj.exe, ['-e', newObj.code], newObj.conf.spawnOptions ||
-      //   { env: {} });   
-        
       newObj.node = spawn(
         "docker",
         [ "run", "-i", "--rm", "node:23.4-slim", "node", "-e", newObj.code],
@@ -360,49 +196,6 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
           ...newObj.conf.spawnOptions, // Use any custom spawn options
         }
       );
-    }
-
-    /**
-     * For java language
-     */
-    else if (newObj.cmp == "java") {
-
-      newObj.code = newObj.code.replace(/"start"/gi, 'public class Main {\npublic static void main(String[] args){')
-        .replace(/"end"/gi, '\t}\n}')
-        .replace(/(^\s*pt)(.*)/gim, 'System.out.println($2);');
-      // const regex = /(?<=class\s*)\w+(?=\s*\{?\s*[\n\s]{0,3}public\s*static\s*void\s*main)/g;
-      const found = find(newObj.code)
-
-      if (found) {
-        newObj.javaFile = found
-      } else {
-        terminate(ctx, obj)
-        ctx.reply('No main class found ask @LogicB_support why this error.').catch((err: any) => { })
-        return ctx.scene.leave()
-      }
-
-      // newObj.root = path.join('.', 'files', `${newObj.cmp}${newObj.fromId}`);
-      newObj.root = path.join(require('os').tmpdir(), `${newObj.cmp}${newObj.fromId}`);
-      newObj.filePath = path.join(newObj.root, `${newObj.javaFile}.${newObj.cmp}`);
-
-      try {
-        fs.mkdirSync(newObj.root);
-        fs.writeFileSync(newObj.filePath, newObj.code);
-      } catch (err) {
-        // Handle file writing error
-        console.error(err);
-        return terminate(ctx, obj)
-      }
-
-      const { status, stderr } = spawnSync(which.sync('javac', { nothrow: true }), [newObj.filePath]);
-
-      if (status !== 0) {
-        terminate(ctx, obj);
-        reply(ctx, stderr.toString());
-        return ctx.scene.leave();
-      }
-
-      newObj.node = spawn(newObj.exe, ['-cp', newObj.root, newObj.javaFile], config.spawnOptions || { env: {} });
     }
 
     newObj.node.setMaxListeners(0)
