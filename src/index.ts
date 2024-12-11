@@ -229,7 +229,7 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
   bot.hears(new RegExp("^\\" + config.startSymbol + "(code|start|py|python|ts|type|js|node|cc|cpp|cplus|sql|go|jv|java|c\\+\\+|sh|ps|rs|rust)|\\/start", "i"), async (ctx: any, next: any) => {
     try {
       modeCheck(conf.mode as tp.Mode, conf.allowed as string[])
-      if (conf.allowed) {
+      if (conf.allowed && (conf.mode != "public")) {
         let allowedStr = conf.allowed.join(" ");
         if (!allowedStr.match(ctx.from.id))
           return ctx.reply("You are not allowed ask @LogicB_support")

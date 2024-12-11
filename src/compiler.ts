@@ -169,10 +169,10 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
      */
     if (newObj.cmp == "py") {
 
-      // newObj.node = spawn(newObj.exe, ['-u', '-c', newObj.code], config.spawnOptions || { env: {} });
-      newObj.node = spawn(
-        "docker",
-        [ "run", "-i", "--rm", "python:3.9-slim", "python3", "-uc", newObj.code] );
+      newObj.node = spawn(newObj.exe, ['-u', '-c', newObj.code], config.spawnOptions || { env: {} });
+      // newObj.node = spawn(
+      //   "docker",
+      //   [ "run", "-i", "--rm", "python:3.9-slim", "python3", "-uc", newObj.code] );
     }
 
     /**
@@ -350,16 +350,16 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
             }
           });
       else
-      // newObj.node = spawn(newObj.exe, ['-e', newObj.code], newObj.conf.spawnOptions ||
-      //   { env: {} });   
+      newObj.node = spawn(newObj.exe, ['-e', newObj.code], newObj.conf.spawnOptions ||
+        { env: {} });   
         
-      newObj.node = spawn(
-        "docker",
-        [ "run", "-i", "--rm", "node:23.4-slim", "node", "-e", newObj.code],
-        {
-          ...newObj.conf.spawnOptions, // Use any custom spawn options
-        }
-      );
+      // newObj.node = spawn(
+      //   "docker",
+      //   [ "run", "-i", "--rm", "node:23.4-slim", "node", "-e", newObj.code],
+      //   {
+      //     ...newObj.conf.spawnOptions, // Use any custom spawn options
+      //   }
+      // );
     }
 
     /**
