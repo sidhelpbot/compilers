@@ -8,3 +8,4 @@ files/
 myfile.ts
 .env
 notes
+.devcontainer/
