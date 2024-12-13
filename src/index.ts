@@ -296,9 +296,9 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
       }
       else if (cmp("jv|java")) {
         rplc("java", "jv")
-        if (exes.java || exes.javac)
+        // if (exes.java || exes.javac)
           ctx.scene.enter("jv")
-        else ctx.reply("No java compiler exists in system").catch((err: any) => console.error(err))
+        // else ctx.reply("No java compiler exists in system").catch((err: any) => console.error(err))
       }
       else if (cmp("rs|rust")) {
         rplc("rust", "rs")

@@ -80,19 +80,7 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
     }
 
     async function sendToTelegram(tempdata: any) {
-      // let current = Date.now()
-      // if (previous + 1000 > current)
-      //   repeats++
-      // console.log(repeats, tempdata.toString())
-      // if (repeats > 15 && !looperr) {
-      //   looperr = true
-      //   await terminate(ctx, obj)
-      //   reply(ctx, 'It seems you are created infinite loop')
-      //   ctx.scene.leave()
-      //   return await h.sleep(500)
-      // }
-
-      newObj.editedMes += tempdata.toString().replace("\\", "\\\\")
+      newObj.editedMes += tempdata.toString()?.replace("\\", "\\\\")
 
       if (newObj.mid == 0 && newObj.preTime == "undefined" || newObj.preTime && newObj.preTime + 350 < Date.now()) {
         newObj.preTime = Date.now()
@@ -195,6 +183,25 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
         {
           ...newObj.conf.spawnOptions, // Use any custom spawn options
         }
+      );
+    }
+
+    else if (newObj.cmp == "java") {
+      const javaCode = newObj.code;
+      const fileName = "Main.java"; // Temporary file name
+    
+      newObj.node = spawn(
+        "docker",
+        [
+          "run",
+          "-i",
+          "--rm",
+          "openjdk:25-slim",
+          "sh",
+          "-c",
+          `echo "${javaCode.replace(/"/g, '\\"')}" > ${fileName} && javac ${fileName} && java Main`
+        ],
+        config.spawnOptions || {}
       );
     }
 
