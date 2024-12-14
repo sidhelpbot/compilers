@@ -186,10 +186,17 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
       );
     }
 
-    else if (newObj.cmp == "java") {
+    else if (newObj.cmp == "jv") {
       const javaCode = newObj.code;
-      const fileName = "Main.java"; // Temporary file name
-    
+
+      // newObj.code = newObj.code.replace(/"start"/gi, 'public class Main {\npublic static void main(String[] args){')
+      // .replace(/"end"/gi, '\t}\n}')
+
+      const fileName = find(newObj.code); // Temporary file name
+      if(!fileName){
+        terminate(ctx)
+        return ctx.reply("Unable to find a Java MainClassName in the provided code.")
+      }
       newObj.node = spawn(
         "docker",
         [
@@ -199,13 +206,31 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
           "openjdk:25-slim",
           "sh",
           "-c",
-          `echo "${javaCode.replace(/"/g, '\\"')}" > ${fileName} && javac ${fileName} && java Main`
+          `echo "${javaCode.replace(/"/g, '\\"')}" > ${fileName}.java && javac ${fileName}.java && java ${fileName}`
         ],
         config.spawnOptions || {}
       );
     }
-
-    newObj.node.setMaxListeners(0)
+    else if (newObj.cmp == "rs") { // Check for Rust
+      const rustCode = newObj.code;
+      const fileName = "main.rs"; // Temporary Rust file name
+    
+      newObj.node = spawn(
+        "docker",
+        [
+          "run",
+          "-i",
+          "--rm",
+          "rust:1.83-slim",
+          "sh",
+          "-c",
+          `echo "${rustCode.replace(/"/g, '\\"')}" > ${fileName} && rustc ${fileName} && ./main`
+        ],
+        config.spawnOptions || {}
+      );
+    }
+    
+    newObj.node?.setMaxListeners(0)
     newObj.node.stdout.on('data', sendToTelegram);
 
     let m = true

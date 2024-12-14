@@ -47,8 +47,8 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
   // Some default configurations
   conf.version = pjson.version;
   conf.versionNo = 18
-  if(!conf.ttl)
-  conf.ttl = 60;
+  if (!conf.ttl)
+    conf.ttl = 60;
 
   if (!conf.startSymbol)
     conf.startSymbol = "/"
@@ -59,15 +59,15 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
   conf.group = "@Logicb_support";
   if (!conf.channel)
     conf.channel = "@LogicBots";
-  if(!conf.mode)
+  if (!conf.mode)
     conf.mode = "private";
-  if(!conf.allowed)
+  if (!conf.allowed)
     conf.allowed = [] as string[];
 
   (config as any).configure(conf)
 
 
-  
+
   // config.config = conf;
 
   // createEnvironment()
@@ -131,13 +131,13 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
   jvScene.enter(async (ctx: any) => {
     cmdd(ctx)
     if (await startcheck(ctx, 'jv java')) return;
-    await starter(bot, ctx, conf, { cmp: "java", exe: exes.java })
+    await starter(bot, ctx, conf, { cmp: "jv", exe: exes.java })
   });
 
   jvScene.on("message", async (ctx: any) => {
     cmdd(ctx)
     if (await startcheck(ctx, 'jv java')) return;
-    await starter(bot, ctx, conf, { cmp: "java", exe: exes.java })
+    await starter(bot, ctx, conf, { cmp: "jv", exe: exes.java })
   });
 
   let jsScene = new Scenes.BaseScene<Scenes.SceneContext>("js");
@@ -209,10 +209,10 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
   // making instance of Telegraf class
 
   let bot: Telegraf<Scenes.SceneContext> = typeof telegrafBotByUser == "string" ?
-  new Telegraf<Scenes.SceneContext>(telegrafBotByUser, (conf.telegram && typeof conf.telegram == "object") ? conf.telegram : {}) 
-  : telegrafBotByUser;
+    new Telegraf<Scenes.SceneContext>(telegrafBotByUser, (conf.telegram && typeof conf.telegram == "object") ? conf.telegram : {})
+    : telegrafBotByUser;
 
-  
+
   // regestering all scenes
   let stage = new Scenes.Stage<Scenes.SceneContext>([cScene, pyScene, jsScene, rsScene, cppScene, jvScene, goScene, tsScene, shScene, psScene], { ttl: config.ttl });
 
@@ -247,9 +247,9 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
       //   return (new RegExp("^\\" + config.startSymbol + "(" + a + ")", "i")).test(compiler)
       // }
 
-      function cmp(a: string) { 
+      function cmp(a: string) {
         const regex = new RegExp(`^${config.startSymbol}(${a})`, "i");
-        return regex.test(compiler); 
+        return regex.test(compiler);
       }
 
       if (compiler.startsWith("/start") && objj.hasOwnProperty("" + ctx.message.from.id)) {
@@ -259,67 +259,15 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
       }
       const rplc = (fromR: String, toR: String) => {
         if (compiler.startsWith(config?.startSymbol as any + fromR)) {
-          ctx.message.text = compiler.replace(new RegExp("^\\" + config.startSymbol + fromR , "i"), config.startSymbol as any + toR)
+          ctx.message.text = compiler.replace(new RegExp("^\\" + config.startSymbol + fromR, "i"), config.startSymbol as any + toR)
         }
       }
 
-      if (cmp("py|python")) {
-        rplc("python", "py")
-        if (exes.python3 || exes.python)
-          ctx.scene.enter("py")
-        else ctx.reply("No python compiler exists in system").catch((err: any) => console.error(err))
-      }
-      else if (cmp("cc|code")) {
-        rplc("code", "cc")
-        if (exes.gcc)
-          ctx.scene.enter("code")
-        else ctx.reply("No gcc compiler exists in system").catch((err: any) => console.error(err))
-      }
-      else if (cmp("js|node|sql")) {
-        rplc("node", "js")
-        if (exes.node)
-          ctx.scene.enter("js")
-        else ctx.reply("No nodejs compiler exists in system").catch((err: any) => console.error(err))
-      }
-      else if (cmp("ts|type")) {
-        rplc("type", "ts")
-        if (exes.node)
-          ctx.scene.enter("ts")
-        else ctx.reply("No node exists in system").catch((err: any) => console.error(err))
-      }
-      else if (cmp("cpp|cplus|c\\+\\+")) {
-        rplc("cplus", "cpp")
-        rplc("c\\+\\+", "cpp")
-        if (exes.cpp)
-          ctx.scene.enter("cpp")
-        else ctx.reply("No g++ compiler exists in system").catch((err: any) => console.error(err))
-      }
-      else if (cmp("jv|java")) {
-        rplc("java", "jv")
-        // if (exes.java || exes.javac)
-          ctx.scene.enter("jv")
-        // else ctx.reply("No java compiler exists in system").catch((err: any) => console.error(err))
-      }
-      else if (cmp("rs|rust")) {
-        rplc("rust", "rs")
-        if (exes.gcc)
-          ctx.scene.enter("rs")
-        else ctx.reply("No rust compiler exists in system").catch((err: any) => console.error(err))
-      }
-      else if (cmp("go")) {
-        if (exes.go)
-          ctx.scene.enter("go")
-        else ctx.reply("No go compiler exists in system").catch((err: any) => console.error(err))
-      }
-      else if (cmp("sh")) {
-        if (exes.sh)
-          ctx.scene.enter("sh")
-        else ctx.reply("Use /ps command instead sh to run cammand in powershell").catch((err: any) => console.error(err))
-      }
-      else if (cmp("ps")) {
-        if (exes.ps)
-          ctx.scene.enter("ps")
-        else ctx.reply("Use /sh command instead sh to run cammand in bash terminal").catch((err: any) => console.error(err))
+      const cmds = ["go", "ps", "rs", "sh", "ts", "py", "cc", "js", "jv", "sql", "cpp"];
+      for (const cmd of cmds) {
+        if (cmp(cmd)) {
+          ctx.scene.enter(cmd)
+        }
       }
       // next();
     } catch (error: any) {
@@ -382,15 +330,15 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
       else if (("go").includes(cst)) {
         ctx.scene.enter("go")
         return true
-      } 
+      }
       else if (("sh").includes(cst)) {
         ctx.scene.enter("sh")
         return true
-      } 
+      }
       else if (("ps").includes(cst)) {
         ctx.scene.enter("ps")
         return true
-      } 
+      }
 
       return false
     } catch (error) {
