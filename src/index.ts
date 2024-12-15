@@ -46,7 +46,6 @@ export function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scene
 
   // Some default configurations
   conf.version = pjson.version;
-  conf.versionNo = 18
   if (!conf.ttl)
     conf.ttl = 60;
 

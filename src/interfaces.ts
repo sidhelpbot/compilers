@@ -18,7 +18,6 @@ export interface Config {
   ownerId?: UserId;
   admins?: UserId[];
   version?: string;
-  versionNo?: number | string;
   startSymbol?: string;
   owner?: string;
   group?: Username;

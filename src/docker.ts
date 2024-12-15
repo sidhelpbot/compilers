@@ -136,7 +136,7 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
       newObj.inReply = (ctx.message as any).reply_to_message.message_id;
     } else if (newObj.code.startsWith("-r")) {
       ctx.reply("-r flag only works when you send command with code in reply to any message")
-     return await terminate(ctx, obj)
+      return await terminate(ctx, obj)
     }
 
     let ttl = (ctx.scene as any).options.ttl
@@ -152,84 +152,27 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
     }, ttl * 1000)
 
 
-    /**
-     * For python language
-     */
-    if (newObj.cmp == "py") {
+    const commands = {
+      "py": ["run", "-i", "--rm", "python:3.9-slim", "python3", "-uc", newObj.code],
+      "js": ["run", "-i", "--rm", "node:23.4-slim", "node", "-e", newObj.code],
+      "sh": ["run", "-i", "--rm", "ubuntu:24.10", "bash", '-c', newObj.code],
+      "jv": ["run", "-i", "--rm", "openjdk:25-slim", "sh", "-c",
+        `echo "${newObj?.code?.replace(/"/g, '\\"')}" > ${find(newObj.code)}.java && javac ${newObj.code}.java && java ${find(newObj.code)}`
+      ],
+      "rs": ["run", "-i", "--rm", "rust:1.83-slim", "sh", "-c",
+        `echo "${newObj?.code?.replace(/"/g, '\\"')}" > main.rs && rustc main.rs && ./main`],
+    };
 
-      // newObj.node = spawn(newObj.exe, ['-u', '-c', newObj.code], config.spawnOptions || { env: {} });
-      newObj.node = spawn(
-        "docker",
-        [ "run", "-i", "--rm", "python:3.9-slim", "python3", "-uc", newObj.code] );
-    }
-
-    /**
-     * For Bash commands
-     */
-    else if (newObj.cmp == "sh") {
-      newObj.node = spawn(
-        "docker",
-        [ "run", "-i", "--rm", "ubuntu:24.10", "bash", '-c', newObj.code], config.spawnOptions || {});
-    }
-
-    /**
-     * For js/ts languages
-     */
-    else if ((/js/.test(newObj.cmp))) {
-      newObj.countpp = countp(newObj.code)
-      newObj.node = spawn(
-        "docker",
-        [ "run", "-i", "--rm", "node:23.4-slim", "node", "-e", newObj.code],
-        {
-          ...newObj.conf.spawnOptions, // Use any custom spawn options
-        }
+    if (!Object.keys(commands).includes(newObj.cmp as keyof typeof commands)) {
+      reply(
+        ctx,
+        "Invalid command: " + newObj.cmp,
+        "\nAvailable commands: " + Object.keys(commands).join(", ")
       );
+      return terminate(ctx);
     }
 
-    else if (newObj.cmp == "jv") {
-      const javaCode = newObj.code;
-
-      // newObj.code = newObj.code.replace(/"start"/gi, 'public class Main {\npublic static void main(String[] args){')
-      // .replace(/"end"/gi, '\t}\n}')
-
-      const fileName = find(newObj.code); // Temporary file name
-      if(!fileName){
-        terminate(ctx)
-        return ctx.reply("Unable to find a Java MainClassName in the provided code.")
-      }
-      newObj.node = spawn(
-        "docker",
-        [
-          "run",
-          "-i",
-          "--rm",
-          "openjdk:25-slim",
-          "sh",
-          "-c",
-          `echo "${javaCode.replace(/"/g, '\\"')}" > ${fileName}.java && javac ${fileName}.java && java ${fileName}`
-        ],
-        config.spawnOptions || {}
-      );
-    }
-    else if (newObj.cmp == "rs") { // Check for Rust
-      const rustCode = newObj.code;
-      const fileName = "main.rs"; // Temporary Rust file name
-    
-      newObj.node = spawn(
-        "docker",
-        [
-          "run",
-          "-i",
-          "--rm",
-          "rust:1.83-slim",
-          "sh",
-          "-c",
-          `echo "${rustCode.replace(/"/g, '\\"')}" > ${fileName} && rustc ${fileName} && ./main`
-        ],
-        config.spawnOptions || {}
-      );
-    }
-    
+    newObj.node = spawn("docker", commands[newObj.cmp as keyof typeof commands]);
     newObj.node?.setMaxListeners(0)
     newObj.node.stdout.on('data', sendToTelegram);
 
@@ -292,14 +235,14 @@ async function reply(ctx: any, mss: any, tim: any = 10) {
 
 let terminate = async (ctx: any, options: any = {}) => {
   let newObj = options[ctx.from.id]
-  if(newObj?.ok)
+  if (newObj?.ok)
     return
-  if(!newObj) return
+  if (!newObj) return
   newObj.ok = true;
-  if(newObj.conf.onEnd && typeof newObj.conf.onEnd == "function"){
+  if (newObj.conf.onEnd && typeof newObj.conf.onEnd == "function") {
 
     let end = newObj.conf.onEnd
-    if(end.length == 1){
+    if (end.length == 1) {
       await end(ctx)
     } else {
       await end(ctx, options)
