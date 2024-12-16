@@ -1,4 +1,4 @@
-const find = (javaCode: string): string => {
+export const findClass = (javaCode: string): string => {
     let lines: string[] = javaCode.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '').split(/\r?\n/);
     const findMainFunction = (lines: string[]): string | undefined => lines.find(line => line.includes('public static void main(String[]'));
     const mainIndex = lines.indexOf(findMainFunction(lines) ?? '');
@@ -14,5 +14,3 @@ const find = (javaCode: string): string => {
 
     return mainClass as string;
 };
-
-export default find;

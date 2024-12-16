@@ -3,10 +3,7 @@ import config from './config'
 import { spawn, spawnSync } from 'child_process';
 import fs from 'fs'
 let which = require("which")
-import path from "path"
-import find from './help/findclass';
-import { Context, Scenes } from 'telegraf';
-import { Update } from 'telegraf/types';
+import {findClass} from './tools';
 import { CustomCtx } from './types';
 
 let h = new Hlp();
@@ -157,7 +154,7 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
       "js": ["run", "-i", "--rm", "node:23.4-slim", "node", "-e", newObj.code],
       "sh": ["run", "-i", "--rm", "ubuntu:24.10", "bash", '-c', newObj.code],
       "jv": ["run", "-i", "--rm", "openjdk:25-slim", "sh", "-c",
-        `echo "${newObj?.code?.replace(/"/g, '\\"')}" > ${find(newObj.code)}.java && javac ${newObj.code}.java && java ${find(newObj.code)}`
+        `echo "${newObj?.code?.replace(/"/g, '\\"')}" > ${findClass(newObj.code)}.java && javac ${newObj.code}.java && java ${findClass(newObj.code)}`
       ],
       "rs": ["run", "-i", "--rm", "rust:1.83-slim", "sh", "-c",
         `echo "${newObj?.code?.replace(/"/g, '\\"')}" > main.rs && rustc main.rs && ./main`],

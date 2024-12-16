@@ -12,9 +12,10 @@ export interface Config {
   telegram?: Partial<Telegraf.Options<Scenes.SceneContext<Scenes.SceneSessionData>>>;
   mode?: Mode;
   codeLogs?: Chatid;
+  commands?: [ "py", "js", "cc", "cpp", "jv", "ts", "go", "rs", "sh"];
   chatLogs?: Chatid;
   errorLogs?: UserId;
-  ttl: number;
+  ttl?: number;
   ownerId?: UserId;
   admins?: UserId[];
   version?: string;

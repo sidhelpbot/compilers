@@ -1,7 +1,9 @@
 import { Scenes, Telegraf } from "telegraf";
 import * as tp from "./interfaces";
-export declare function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scenes.SceneContext>, conf?: tp.Config): {
+type IOConfig = tp.Config;
+export { IOConfig };
+export declare function compiler(telegrafBotByUser: tp.TelegramBotToken | Telegraf<Scenes.SceneContext>): {
     bot: Telegraf<Scenes.SceneContext<Scenes.SceneSessionData>>;
-    config: tp.Config;
+    conf: tp.Config;
 };
 //# sourceMappingURL=index.d.ts.map

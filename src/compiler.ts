@@ -4,7 +4,7 @@ import { spawn, spawnSync } from 'child_process';
 import fs from 'fs'
 let which = require("which")
 import path from "path"
-import find from './help/findclass';
+import {findClass} from './tools';
 import { Context, Scenes } from 'telegraf';
 import { Update } from 'telegraf/types';
 import { CustomCtx } from './types';
@@ -371,7 +371,7 @@ let cmplr = async (ctx: CustomCtx, obj: any = {}) => {
         .replace(/"end"/gi, '\t}\n}')
         .replace(/(^\s*pt)(.*)/gim, 'System.out.println($2);');
       // const regex = /(?<=class\s*)\w+(?=\s*\{?\s*[\n\s]{0,3}public\s*static\s*void\s*main)/g;
-      const found = find(newObj.code)
+      const found = findClass(newObj.code)
 
       if (found) {
         newObj.javaFile = found

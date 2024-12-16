@@ -7,7 +7,7 @@ export const modeCheck = (mode: Mode, array: string[] = []) => {
             Add option {allowed: ['your tg ids']} `)
     }
     if(mode === "public" && array.length != 0){
-        throw new Error("Public mode does'nt needed user's telegram id\nRemove option {allowed: ['']} or use it privately by making {mode: 'private'")
+        throw new Error("Public mode doesn't needed user's telegram id\nRemove option {allowed: ['']} or use it privately by making {mode: 'private'")
     }
     if(mode == "api-mode" && array.length != 0){
         throw new Error("Api mode is not supported now please use private or public or docker-private modes")

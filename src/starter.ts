@@ -1,5 +1,6 @@
 import Hlp from './helpers';
-import config from "./config"
+import conf from "./config"
+import { scenes } from './scenes';
 import * as tp from "./interfaces"
 import EventEmitter from 'events';
 import sql from "./help/sql"
@@ -12,7 +13,7 @@ let func: any = {};
 let h = new Hlp()
 let sqlite: any;
 
-async function starter(bot: any, ctx: any, conf: tp.Config, usr: any) {
+async function starter(ctx: any, usr: any) {
   try {
 
     let id: any = ctx.message.from.id
@@ -114,7 +115,7 @@ export default starter
 
 async function replyy(ctx: any, msg: any) {
   ctx.reply(msg)
-    .then(async (ms: any) => { await h.sleep(Math.floor(config.ttl / 2) * 1000); return ms; })
+    .then(async (ms: any) => { await h.sleep(Math.floor((conf?.ttl as number) / 2) * 1000); return ms; })
     .then(async (ms: any) => { ctx.deleteMessage(ms.message_id).catch((err: any) => { }) })
     .catch((err: any) => { })
 }
